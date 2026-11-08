@@ -12,5 +12,12 @@ window.AR46_PRICE_CATALOG = {
     hydraulic_repair_from: 12000,
     electric_repair_from: 15000
   },
-  offers: []
+  offers: [],
+  // Пользовательский скриншот страницы-образца; не является прайсом АвтоРейка46.
+  reference_examples: [{
+    brand: 'Daihatsu', model: 'Applause', generation_label: '(A101/A111) · гидро',
+    source_name: 'Сайт-образец GS Service',
+    source_url: 'https://gs-service.ru/remont/remont-rulevykh-reek/brand-daihatsu/daihatsu-applause/daihatsu-applause-a101-a111-1989-2000-gidro/',
+    services: {repair: 9600, install: 7000}
+  }]
 };

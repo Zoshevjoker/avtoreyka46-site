@@ -8,7 +8,7 @@ const fmt=d=>d?new Date(d).toLocaleDateString('ru-RU',{day:'numeric',month:'long
 const money=n=>n===null||n===undefined?'Цена уточняется':Number(n).toLocaleString('ru-RU')+' ₽';
 const state={brands:[],models:[],generations:[],brand:null,model:null,generation:null,estimate:null,
   reviews:[],reviewIndex:0,autoplay:null,paused:false,catalog:[],settings:{},authorized:false,role:'',
-  currentTab:'orders',offline:false,showAllBrands:true,manualYear:null,alphabet:'',token:sessionStorage.getItem('ar46.admin.token')||''};
+  currentTab:'orders',offline:false,showAllBrands:false,manualYear:null,alphabet:'',token:sessionStorage.getItem('ar46.admin.token')||''};
 const help='Не удалось связаться с сервером техцентра. Запись через сайт сейчас недоступна. Позвоните по телефону в шапке.';
 
 // Публичные выдержки-пересказы из отзывов на Яндекс Картах. Это не записи из системы
@@ -45,9 +45,28 @@ function openRequest(subject='',productId=null,vehicleOverride=null){
  if(productId!==null&&!product){popup('Товар недоступен','<p>Позиция не найдена в актуальном каталоге. Уточните наличие по телефону.</p>');return;}
  const vehicle=vehicleOverride||formatVehicle()||product?.vehicle||'';
  if(state.offline){
-  const label=vehicle||'Ваш автомобиль';
-  const mailText=`Здравствуйте! Хочу уточнить услугу «${subject||'Подбор/ремонт рейки'}».\nАвтомобиль: ${label}\nПодскажите, пожалуйста, доступность и ориентировочную стоимость ремонта.`;
-  popup('Связаться с техцентром',`<p class="ar-form-lead">Ваш выбор: <strong>${esc(label)}</strong>.</p><p>Сайт демонстрируется на бесплатном GitHub Pages, поэтому заявки не передаются автоматически. Можно позвонить или открыть готовое письмо с выбранным автомобилем и услугой.</p><div class="ar-offline-actions"><a class="button primary" href="tel:+79513302277">Позвонить: +7 (951) 330-22-77 ↗</a><a class="button subtle" href="mailto:info@avtoreyka46.ru?subject=${encodeURIComponent('АвтоРейка46 · '+label)}&body=${encodeURIComponent(mailText)}">Открыть письмо с данными ↗</a></div><p class="ar-contact-note">Письмо отправится только после подтверждения в вашей почтовой программе. Адрес взят из текущего сайта.</p>`);
+  const label=vehicle||'Автомобиль не выбран';
+  const topic=subject||'Диагностика / ремонт рулевой рейки';
+  popup('Записаться на ремонт',`<p class="ar-form-lead">Выбрано: <strong>${esc(label)}</strong></p>
+   <p class="ar-mail-caption">Заполните короткую заявку. На GitHub Pages она <strong>не отправляется автоматически</strong>: мы подготовим письмо с автомобилем, услугой и контактами для отправки с вашей почты.</p>
+   <form class="ar-contact-composer" id="arContactComposer">
+    <label>Имя для обращения<input name="name" maxlength="80" autocomplete="name" placeholder="Ваше имя" required></label>
+    <label>Номер для обратной связи<input name="phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 999 123-45-67" required></label>
+    <label class="ar-full">Выбранный автомобиль<input name="vehicle" value="${esc(label)}" readonly></label>
+    <label class="ar-full">Услуга<input name="service" value="${esc(topic)}" readonly></label>
+    <label class="ar-full">Что необходимо сделать?<textarea name="details" rows="3" maxlength="1000" placeholder="Например, слышен стук при повороте или есть течь"> </textarea></label>
+    <label class="ar-full ar-consent"><input type="checkbox" name="consent" required><span>Согласен указать контактные данные в письме техцентру. До открытия почтового приложения информация никуда не отправляется.</span></label>
+    <button type="submit" class="button primary ar-full">Подготовить заявку →</button>
+   </form>
+   <p class="ar-contact-note">Или позвоните напрямую: <a href="tel:+79513302277">+7 (951) 330-22-77</a>. Письмо необходимо отправить самостоятельно.</p>`,dlg=>{
+     dlg.querySelector('#arContactComposer').addEventListener('submit',event=>{
+       event.preventDefault();
+       const v=new FormData(event.currentTarget);
+       const text=`Здравствуйте! Хочу записаться на ремонт в АвтоРейка46.\nИмя: ${String(v.get('name')||'').trim()}\nТелефон: ${String(v.get('phone')||'').trim()}\nАвтомобиль: ${label}\nУслуга: ${topic}\nПроблема: ${String(v.get('details')||'').trim()||'Будет уточнена'}\nПрошу связаться для согласования времени и стоимости.`;
+       const mail='mailto:info@avtoreyka46.ru?subject='+encodeURIComponent('Запись на ремонт · '+label)+'&body='+encodeURIComponent(text);
+       popup('Заявка подготовлена',`<p>Данные заявки сформированы. Чтобы техцентр получил их, <strong>откройте почтовую программу и отправьте письмо</strong>.</p><div class="ar-offline-actions"><a class="button primary" href="${esc(mail)}">Открыть письмо и отправить ↗</a><button type="button" class="button subtle" id="arCopyRequest">Скопировать текст заявки</button><a class="button subtle" href="tel:+79513302277">Позвонить ↗</a></div><p class="ar-contact-note">Мы не сохраняем заявки на GitHub Pages. Не считайте запись подтверждённой до ответа сотрудника.</p>`,ready=>{ready.querySelector('#arCopyRequest').onclick=()=>{if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).then(()=>{ready.querySelector('#arCopyRequest').textContent='Текст скопирован ✓'}).catch(()=>fallbackCopy(text,ready.querySelector('#arCopyRequest')));}else fallbackCopy(text,ready.querySelector('#arCopyRequest'));};});
+     });
+   });
   return;
  }
 
@@ -81,6 +100,7 @@ function openRequest(subject='',productId=null,vehicleOverride=null){
 // Каталог для бесплатного статического хостинга: без сервера, но с полноценной навигацией.
 const DIRECTORY=window.AR46_VEHICLE_FALLBACK||{};
 const PRICE_DATA=window.AR46_PRICE_CATALOG||{offers:[],published_general_prices:{}};
+const referenceQuotes=PRICE_DATA.reference_examples||[];
 const repairGuide=[
  {id:'diagnostic',kicker:'01 · Проверка',title:'Диагностика рулевого управления',description:'Выявление источника люфта, стука, течи или тугого руля. Проверка снятой рейки по опубликованному прайсу, диагностика на машине — по запросу.',price:(PRICE_DATA.published_general_prices?.diagnostic_removed_rack_from!=null?'от '+money(PRICE_DATA.published_general_prices.diagnostic_removed_rack_from):'По запросу'),priceNote:'Базовая цена диагностики снятой рейки, не расчёт для выбранной модели'},
  {id:'repair',kicker:'02 · Восстановление',title:'Ремонт рулевой рейки',description:'Дефектовка, проверка вала, корпуса и уплотнений. Состав работ зависит от конструкции и повреждений, поэтому стоимость рассчитывается после диагностики.',price:'По запросу',priceNote:'Виды реек и стоимость отличаются в зависимости от модификации'},
@@ -90,10 +110,10 @@ const repairGuide=[
 function norm(s){return String(s||'').normalize('NFKC').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();}
 function logoFor(brand){
  const url=DIRECTORY.brand_logos?.[brand.name];
- return url?`<img src="./${esc(url)}" alt="" loading="lazy" width="42" height="30">`:`<span class="ar-brand-monogram" aria-hidden="true">${esc(brand.name.replace(/[^A-Za-zА-Яа-яЁё0-9]/g,'').slice(0,2).toUpperCase())}</span>`;
+ return url?`<img src="./${esc(url)}" alt="" loading="lazy" width="54" height="38">`:`<span class="ar-brand-monogram" aria-hidden="true">${esc(brand.name.replace(/[^A-Za-zА-Яа-яЁё0-9]/g,'').slice(0,2).toUpperCase())}</span>`;
 }
 function brandButtons(items){return items.map(b=>`<button class="ar-maker" type="button" data-brand-id="${b.id}" aria-label="Выбрать марку ${esc(b.name)}">${logoFor(b)}<span>${esc(b.name)}</span><span class="ar-maker-arrow" aria-hidden="true">›</span></button>`).join('');}
-function setStep(step,brandMode=false){
+function setStep(step){
  const buttons=[...document.querySelectorAll('.ar-wizard-steps [data-step]')];
  const values={brand:state.brand?.name||'Выберите марку',model:state.model?.name||'Выберите модель',generation:state.generation?.label||(state.manualYear?state.manualYear+' год':'Выберите поколение')};
  for(const b of buttons){
@@ -129,26 +149,22 @@ function renderWizard(){
    heading.textContent='Подбор завершён — доступные направления работ';
    opts.hidden=true;bar.hidden=true;renderEstimate();return;
  }
- $('arEstimate').hidden=true;opts.hidden=false;bar.hidden=false;
- search.placeholder=step==='brand'?'Марка, например Ford, Toyota, Lada':step==='model'?'Найти модель '+state.brand.name:'Найти поколение или год';
- const q=norm(search.value);
+ $('arEstimate').hidden=true;opts.hidden=false;bar.hidden=step!=='brand';
+ search.placeholder='Введите название марки — например Ford, Toyota или Lada';
+ const q=step==='brand'?norm(search.value):'';
  if(step==='brand'){
   heading.textContent='Выберите марку автомобиля';
+  const featured30=new Set(['Audi','BMW','Chevrolet','Chery','Citroen','Daihatsu','Ford','GAZ','Geely','Great Wall','Haval','Honda','Hyundai','Kia','Lada','Land Rover','Lexus','Mazda','Mercedes-Benz','Mitsubishi','Nissan','Opel','Peugeot','Renault','Skoda','Subaru','Suzuki','Toyota','Volkswagen','Volvo']);
   const matches=state.brands.filter(x=>{
     const aliases=DIRECTORY.brand_aliases?.[x.name]||[];
     return (!state.alphabet||x.name.charAt(0).toUpperCase()===state.alphabet)&&[x.name,...aliases].some(s=>norm(s).includes(q));
   });
-  const visible=!state.showAllBrands&&!q&&!state.alphabet?matches.slice(0,30):matches;
+  const visible=!state.showAllBrands&&!q&&!state.alphabet?matches.filter(x=>featured30.has(x.name)):matches;
   count.textContent=`${visible.length} из ${state.brands.length} марок`;
   opts.className='ar-choice-grid ar-maker-grid';
-  let previous='';const tiles=[];
-  for(const brand of visible){
-   const letter=brand.name.charAt(0).toUpperCase();
-   if(letter!==previous){tiles.push(`<div class="ar-maker-group-title">${esc(letter)}</div>`);previous=letter;}
-   tiles.push(brandButtons([brand]));
-  }
-  opts.innerHTML=tiles.join('')||'<p class="ar-empty">Ничего не найдено. Попробуйте другое название или сбросьте буквенный фильтр.</p>';
-  toggle.textContent=state.showAllBrands?'Свернуть список до 30 марок ↑':'Показать весь каталог марок ↓';
+  // Alphabetic navigation is already provided above; extra row headings made the 30-card preview very tall.
+  opts.innerHTML=brandButtons(visible)||'<p class="ar-empty">Ничего не найдено. Попробуйте другое название или сбросьте буквенный фильтр.</p>';
+  toggle.textContent=state.showAllBrands?'Свернуть до 30 популярных марок ↑':`Показать весь каталог — ${state.brands.length} марок ↓`;
   toggle.setAttribute('aria-expanded',String(state.showAllBrands));renderAlpha();return;
  }
  if(step==='model'){
@@ -176,7 +192,7 @@ function renderEstimate(){
  const vehicle=formatVehicle();
  const gen=state.generation;
  const years=gen?`${gen.year_from||'Дата начала неизвестна'} – ${gen.year_to||'н.в.'}`:state.manualYear+' г.';
- const steering=confirmed&&x.steering_type?x.steering_type:'Определяется по VIN, комплектации и конструкции узла';
+ const steering=confirmed&&x.steering_type?x.steering_type:(gen?.steering_type==='hydraulic'?'Гидравлическая (по справочному образцу; уточнить по VIN)':'Определяется по VIN, комплектации и конструкции узла');
  const confirmedService=confirmed&&x.services?String(x.services):null;
  const servicePrice=confirmed&&x.price_min!=null?(x.price_max!=null&&x.price_max!==x.price_min?money(x.price_min)+' – '+money(x.price_max):money(x.price_min)):null;
  const serviceCards=repairGuide.map((item,index)=>{
@@ -186,17 +202,20 @@ function renderEstimate(){
    const offerPrice=offer&&offer.price_from!=null
       ?('от '+money(offer.price_from)+(offer.price_to!=null?' до '+money(offer.price_to):''))
       :offer?.price_text||null;
-   const displayedPrice=offerPrice||item.price;
-   const guideNote=offer?('Подтверждено техцентром'+(offer.timeframe?' · '+offer.timeframe:'')):item.priceNote;
+   const displayedPrice=offerPrice||'Стоимость уточняется';
+   const guideNote=offer?('Цена подтверждена техцентром'+(offer.timeframe?' · '+offer.timeframe:'')):'Для этого автомобиля нет подтверждённого прайса';
+   const ref=referenceQuotes.find(q=>q.brand===state.brand?.name&&q.model===state.model?.name&&q.generation_label===gen?.label);
+   const referencePrice=ref?.services?.[item.id];
+   const referenceHTML=referencePrice!=null?`<div class="ar-reference-quote"><span>Пример цены другого сервиса: <b>${money(referencePrice)}</b></span><a href="${esc(ref.source_url)}" target="_blank" rel="noopener noreferrer">Источник ↗</a><small>Не цена и не предложение «АвтоРейка46»</small></div>`:'';
    return `<article class="ar-service-quote">
      <div class="ar-quote-top"><span class="ar-service-index">${esc(item.kicker)}${offer?' · ✓ Подтверждено':''}</span><span class="ar-quote-symbol" aria-hidden="true">${['⌕','⚙','↗','▤'][index]}</span></div>
-     <h4>${esc(item.title)}</h4><p class="ar-quote-car">${esc(vehicle)}</p><p>${esc(offer?.description||item.description)}</p>
-     <div class="ar-quote-bottom"><div><strong>${esc(displayedPrice)}</strong><small>${esc(guideNote)}</small></div><button type="button" class="ar-quote-button" data-guide-service="${esc(item.title)}">Уточнить стоимость <span aria-hidden="true">↗</span></button></div>
+     <h4>${esc(item.title)}</h4><p class="ar-quote-car">${esc(vehicle)}</p><p>${esc(offer?.description||item.description)}</p>${referenceHTML}
+     <div class="ar-quote-bottom"><div><strong>${esc(displayedPrice)}</strong><small>${esc(guideNote)}</small></div><button type="button" class="ar-quote-button" data-guide-service="${esc(item.title)}">Записаться на ремонт <span aria-hidden="true">↗</span></button></div>
    </article>`;
  }).join('');
  box.innerHTML=`<div class="ar-result-summary"><div><div class="ar-picker-overline">ВЫБРАННЫЙ АВТОМОБИЛЬ</div><h3>${esc(vehicle)}</h3><p>Годы / поколение: ${esc(years)} · рулевой механизм: ${esc(steering)}</p></div><button class="ar-reset-picker" id="arChangeSelection" type="button">Изменить выбор ↶</button></div>
  ${confirmed&&confirmedService?`<div class="ar-confirmed-info"><b>Подтверждённые сведения техцентра</b><p>Услуги: ${esc(confirmedService)}. ${servicePrice?'Ориентир: '+esc(servicePrice)+'. ':''}${x.timeframe?'Срок: '+esc(x.timeframe)+'. ':''}</p></div>`:''}
- <div class="ar-result-head"><div><div class="ar-picker-overline">ВОЗМОЖНЫЕ УСЛУГИ</div><h3>Направления ремонта и ориентиры по цене</h3></div><p>Для услуг без отметки «Подтверждено» применимость и стоимость <strong>нужно уточнить у специалиста</strong>.</p></div>
+ <div class="ar-result-head"><div><div class="ar-picker-overline">УСЛУГИ ПО РЕМОНТУ</div><h3>Услуги по ремонту для ${esc(state.brand?.name)} ${esc(state.model?.name)}</h3></div><p>Для услуг без отметки «Подтверждено» применимость и стоимость <strong>нужно уточнить у специалиста</strong>.</p></div>
  <div class="ar-service-quotes">${serviceCards}</div>
  <div class="ar-price-disclaimer"><b>Что с точной стоимостью?</b><p>После диагностики мастер определит тип рейки, объём ремонта и цену. Базовые ориентиры из опубликованного перечня: механическая — ${PRICE_DATA.published_general_prices?.mechanical_repair_from!=null?'от '+money(PRICE_DATA.published_general_prices.mechanical_repair_from):'по запросу'}, гидравлическая — ${PRICE_DATA.published_general_prices?.hydraulic_repair_from!=null?'от '+money(PRICE_DATA.published_general_prices.hydraulic_repair_from):'по запросу'}, электрическая — ${PRICE_DATA.published_general_prices?.electric_repair_from!=null?'от '+money(PRICE_DATA.published_general_prices.electric_repair_from):'по запросу'}. Это <strong>не индивидуальная цена на ${esc(vehicle)}</strong>.</p><div class="ar-result-actions"><button type="button" class="button primary" id="arEstimateRequest">Уточнить стоимость ремонта ↗</button><button type="button" class="button subtle" id="arCopyVehicle">Скопировать данные автомобиля</button></div></div>`;
  $('arEstimateRequest').onclick=()=>openRequest('Уточнить стоимость ремонта рулевой рейки',null,vehicle);
