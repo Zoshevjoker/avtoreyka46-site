@@ -37,19 +37,8 @@
 @media(prefers-reduced-motion:reduce){.marque-grid .brand-choice,.ar-choice{transition:none!important}.marque-grid .brand-choice:hover{transform:none}}
 .ar-small-label{display:block;font-size:.75rem;color:#c7d8ca;margin-top:8px}.ar-small-label input{display:block;background:#102319;color:white;border:1px solid #58765d;max-width:190px;border-radius:8px;padding:6px}
 
-
-/* GitHub Pages demo notice */
-.ar-demo-notice {
-  position: relative;
-  z-index: 1000;
-  padding: 11px 18px;
-  text-align: center;
-  color: #f4f7f4;
-  background: #263a30;
-  border-bottom: 1px solid rgba(255,255,255,.18);
-  font: 500 14px/1.45 system-ui, sans-serif;
-}
-.ar-demo-notice strong { color: #fff; }
-@media (max-width: 600px) {
-  .ar-demo-notice { padding: 10px 12px; font-size: 12px; }
-}
+.ar-demo-notice{position:relative;z-index:1000;padding:12px 18px;text-align:center;color:#f4f7f4;background:#263a30;border-bottom:1px solid rgba(255,255,255,.18);font:500 14px/1.5 system-ui,sans-serif}
+.ar-demo-notice strong{color:#fff}
+.ar-demo-notice+*{scroll-margin-top:12px}
+button[disabled]{opacity:.65;cursor:not-allowed}
+@media(max-width:600px){.ar-demo-notice{padding:10px 12px;font-size:12px}}

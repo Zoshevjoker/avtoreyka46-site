@@ -10,10 +10,83 @@ const state={brands:[],models:[],generations:[],brand:null,model:null,generation
   reviews:[],reviewIndex:0,autoplay:null,paused:false,catalog:[],settings:{},authorized:false,role:'',
   currentTab:'orders',token:sessionStorage.getItem('ar46.admin.token')||''};
 const help='Не удалось связаться с сервером техцентра. Запись через сайт сейчас недоступна. Позвоните по телефону в шапке.';
+
+const DEMO={
+ brands:[
+  {id:1,name:'Audi'},{id:2,name:'BMW'},{id:3,name:'Ford'},{id:4,name:'Honda'},
+  {id:5,name:'Hyundai'},{id:6,name:'Kia'},{id:7,name:'Lada'},{id:8,name:'Mazda'},
+  {id:9,name:'Mercedes-Benz'},{id:10,name:'Mitsubishi'},{id:11,name:'Nissan'},
+  {id:12,name:'Renault'},{id:13,name:'Škoda'},{id:14,name:'Toyota'},{id:15,name:'Volkswagen'}
+ ],
+ models:{
+  1:[{id:101,name:'A3'},{id:102,name:'A4'},{id:103,name:'Q5'}],
+  2:[{id:201,name:'3 Series'},{id:202,name:'5 Series'},{id:203,name:'X3'}],
+  3:[{id:301,name:'Focus'},{id:302,name:'Mondeo'},{id:303,name:'Kuga'}],
+  4:[{id:401,name:'Civic'},{id:402,name:'Accord'},{id:403,name:'CR-V'}],
+  5:[{id:501,name:'Solaris'},{id:502,name:'Tucson'},{id:503,name:'Santa Fe'}],
+  6:[{id:601,name:'Rio'},{id:602,name:'Ceed'},{id:603,name:'Sportage'}],
+  7:[{id:701,name:'Granta'},{id:702,name:'Vesta'},{id:703,name:'Largus'}],
+  8:[{id:801,name:'Mazda 3'},{id:802,name:'Mazda 6'},{id:803,name:'CX-5'}],
+  9:[{id:901,name:'C-Class'},{id:902,name:'E-Class'},{id:903,name:'GLC'}],
+  10:[{id:1001,name:'Lancer'},{id:1002,name:'Outlander'},{id:1003,name:'ASX'}],
+  11:[{id:1101,name:'Almera'},{id:1102,name:'Qashqai'},{id:1103,name:'X-Trail'}],
+  12:[{id:1201,name:'Logan'},{id:1202,name:'Duster'},{id:1203,name:'Sandero'}],
+  13:[{id:1301,name:'Octavia'},{id:1302,name:'Rapid'},{id:1303,name:'Kodiaq'}],
+  14:[{id:1401,name:'Corolla'},{id:1402,name:'Camry'},{id:1403,name:'RAV4'}],
+  15:[{id:1501,name:'Polo'},{id:1502,name:'Passat'},{id:1503,name:'Tiguan'}]
+ },
+ generations:{
+  101:[{id:10001,label:'8P',year_from:2003,year_to:2012},{id:10002,label:'8V',year_from:2012,year_to:2020}],
+  102:[{id:10003,label:'B8',year_from:2007,year_to:2015},{id:10004,label:'B9',year_from:2015,year_to:2024}],
+  103:[{id:10005,label:'8R',year_from:2008,year_to:2017},{id:10006,label:'FY',year_from:2017,year_to:2024}],
+  201:[{id:10007,label:'E90',year_from:2005,year_to:2013},{id:10008,label:'F30',year_from:2011,year_to:2019},{id:10009,label:'G20',year_from:2018,year_to:2025}],
+  202:[{id:10010,label:'F10',year_from:2009,year_to:2017},{id:10011,label:'G30',year_from:2016,year_to:2024}],
+  203:[{id:10012,label:'F25',year_from:2010,year_to:2017},{id:10013,label:'G01',year_from:2017,year_to:2024}],
+  301:[{id:10014,label:'II',year_from:2004,year_to:2011},{id:10015,label:'III',year_from:2011,year_to:2019},{id:10016,label:'IV',year_from:2018,year_to:2025}],
+  302:[{id:10017,label:'IV',year_from:2007,year_to:2014},{id:10018,label:'V',year_from:2014,year_to:2022}],
+  501:[{id:10019,label:'I',year_from:2010,year_to:2017},{id:10020,label:'II',year_from:2017,year_to:2024}],
+  601:[{id:10021,label:'III',year_from:2011,year_to:2017},{id:10022,label:'IV',year_from:2017,year_to:2023}],
+  701:[{id:10023,label:'I',year_from:2011,year_to:2018},{id:10024,label:'I FL',year_from:2018,year_to:2025}],
+  702:[{id:10025,label:'I',year_from:2015,year_to:2023},{id:10026,label:'I FL',year_from:2023,year_to:2025}],
+  1301:[{id:10027,label:'A5',year_from:2004,year_to:2013},{id:10028,label:'A7',year_from:2012,year_to:2020},{id:10029,label:'A8',year_from:2019,year_to:2025}],
+  1402:[{id:10030,label:'XV50',year_from:2011,year_to:2018},{id:10031,label:'XV70',year_from:2017,year_to:2024}],
+  1501:[{id:10032,label:'V',year_from:2009,year_to:2020},{id:10033,label:'VI',year_from:2020,year_to:2025}],
+  1502:[{id:10034,label:'B7',year_from:2010,year_to:2015},{id:10035,label:'B8',year_from:2014,year_to:2023}]
+ },
+ reviews:[
+  {author:'Пример клиента',rating:5,body:'После диагностики мастер подробно объяснил, какие узлы требуют внимания и какие варианты ремонта возможны. Все этапы и стоимость согласовали заранее.',vehicle:'Пример отзыва · автомобиль не указан',published_at:'2026-01-15',company_reply:'Спасибо за обратную связь!'},
+  {author:'Демонстрационный отзыв',rating:5,body:'Показываем, как может выглядеть карточка отзыва: оценка, текст клиента, автомобиль и ответ техцентра. Этот текст создан только для демонстрации интерфейса.',vehicle:'Пример карточки · не отзыв клиента',published_at:'2026-02-10',company_reply:'Благодарим за интерес к нашему техцентру.'},
+  {author:'Пример оформления',rating:4,body:'В реальной версии здесь будет опубликован отзыв после завершённого заказа и проверки модератором. Сейчас отображается образец, чтобы можно было оценить дизайн блока.',vehicle:'Демонстрационные данные',published_at:'2026-03-05'}
+ ],
+ products:[
+  {id:'demo-1',sku:'ПРИМЕР-001',name:'Рулевая рейка — пример карточки',vehicle:'Toyota Camry · поколение уточняется',steering_type:'ГУР',price:null,quantity:0},
+  {id:'demo-2',sku:'ПРИМЕР-002',name:'Рулевая рейка — пример карточки',vehicle:'Volkswagen Passat · поколение уточняется',steering_type:'ЭУР',price:null,quantity:0},
+  {id:'demo-3',sku:'ПРИМЕР-003',name:'Рулевая рейка — пример карточки',vehicle:'Lada Vesta · поколение уточняется',steering_type:'ЭУР',price:null,quantity:0}
+ ]
+};
+function demoApi(path){
+ const p=path.split('?')[0];
+ if(p==='/vehicles/brands')return DEMO.brands;
+ const modelMatch=path.match(/\/vehicles\/models\?brand_id=(\d+)/);
+ if(modelMatch)return DEMO.models[Number(modelMatch[1])]||[];
+ const genMatch=path.match(/\/vehicles\/generations\?model_id=(\d+)/);
+ if(genMatch)return DEMO.generations[Number(genMatch[1])]||[
+  {id:20000+Number(genMatch[1]),label:'Поколение уточняется',year_from:null,year_to:null}
+ ];
+ const estimateMatch=path.match(/\/vehicles\/estimate\?generation_id=(\d+)/);
+ if(estimateMatch)return {
+  confirmed:false,year_from:null,year_to:null,steering_type:'Уточняется по модификации и маркировке',
+  price_min:null,price_max:null,services:'Предварительная диагностика механической части; проверка корпуса, вала и уплотнений. Для ЭУР — отдельная проверка компонентов электроусилителя.',
+  timeframe:'После осмотра',description:'Это демонстрационная справка, а не подтверждение совместимости или возможности ремонта конкретного агрегата. Для точного ответа специалисту понадобятся VIN или маркировка рейки и результаты диагностики.'
+ };
+ if(p==='/reviews')return DEMO.reviews;
+ if(p==='/catalog')return DEMO.products;
+ if(p==='/settings')return {phone:'+7 (951) 330-22-77',vk_url:'',avito_url:'',yandex_url:'',yandex_review_url:'',vk_review_url:''};
+ throw Error('В демонстрационной версии серверные действия отключены. Заявка или изменение не отправлены.');
+}
+
 async function api(path,options={}){
-  if(window.AR46_DEMO_MODE){
-    throw Error('Демонстрационный режим: сервер ещё не подключён. Действие не отправлено и данные не сохранены.');
-  }
+  if(window.AR46_DEMO_MODE)return demoApi(path);
   const headers={'Accept':'application/json',...options.body?{'Content-Type':'application/json'}:{},...options.headers};
   const response=await fetch(API+'/api'+path,{...options,headers,mode:'cors',cache:'no-store'});
   const result=await response.json().catch(()=>null);
@@ -102,7 +175,7 @@ function renderEstimate(){
  if(!x){box.innerHTML='<p>Получаем сведения из справочника…</p>';return;}
  const confirmed=Boolean(x.confirmed);
  const cost=confirmed && x.price_min!=null ?(x.price_max!=null&&x.price_max!==x.price_min?`${money(x.price_min)} – ${money(x.price_max)}`:money(x.price_min)):'Стоимость уточняется после диагностики';
- box.innerHTML=`<div class="section-kicker">Выбранный автомобиль</div><h3>${esc(formatVehicle())}</h3>
+ box.innerHTML=`<div class="section-kicker">Демонстрационный подбор · не проверка совместимости</div><h3>${esc(formatVehicle())}</h3>
  <p>${x.year_from||'Год не указан'}${x.year_to?' – '+x.year_to:''}</p>
  <div class="ar-facts"><div><small>Рулевой механизм</small><strong>${esc(confirmed&&x.steering_type||'Уточняется по модификации')}</strong></div>
  <div><small>Ориентировочная стоимость</small><strong>${esc(cost)}</strong></div>
@@ -110,7 +183,7 @@ function renderEstimate(){
  <div><small>Срок выполнения</small><strong>${esc(confirmed&&x.timeframe||'Уточняется')}</strong></div></div>
  ${confirmed&&x.description?`<p>${esc(x.description)}</p>`:''}
  <p class="hint">Окончательная стоимость устанавливается после диагностики и согласования работ. Данные неподтверждённых поколений не выдаются за предложения сервиса.</p>
- <button class="button primary" id="arEstimateRequest" type="button">Записаться на диагностику ↗</button>`;
+ <p class="hint">В рабочей версии здесь будет запись на диагностику. В этой демонстрации отправка отключена.</p>`;
  $('arEstimateRequest').onclick=()=>openRequest('Диагностика рулевого управления',null,formatVehicle());
 }
 async function selectBrand(item){
@@ -155,19 +228,19 @@ function renderCatalog(){
  const q=($('catalogSearch')?.value||'').trim().toLocaleLowerCase('ru');
  const type=$('catalogType')?.value||'';
  const matches=state.catalog.filter(p=>(!type||type===p.steering_type)&&[p.name,p.vehicle,p.sku].join(' ').toLocaleLowerCase('ru').includes(q));
- root.innerHTML=matches.map(p=>`<article class="product-card ar-real-product"><div class="ar-product-glyph" aria-hidden="true">⚙</div><div class="product-body"><span class="tag">Агрегат · ${esc(p.sku)}${p.steering_type?' · '+esc(p.steering_type):''}</span><h3>${esc(p.name)}</h3><p>${esc(p.vehicle)}</p><div class="product-meta"><strong>${esc(money(p.price))}</strong><span class="stock-badge in-stock">Наличие: ${Number(p.quantity)}</span></div><button class="button service-action" type="button" data-real-product="${p.id}">Запросить резерв ↗</button></div></article>`).join('')||'<p class="ar-empty">Опубликованных товаров с такими параметрами сейчас нет. Уточните наличие в техцентре.</p>';
+ root.innerHTML=matches.map(p=>`<article class="product-card ar-real-product"><div class="ar-product-glyph" aria-hidden="true">⚙</div><div class="product-body"><span class="tag">Агрегат · ${esc(p.sku)}${p.steering_type?' · '+esc(p.steering_type):''}</span><h3>${esc(p.name)}</h3><p>${esc(p.vehicle)}</p><div class="product-meta"><strong>${esc(money(p.price))}</strong><span class="stock-badge">Демонстрационный пример</span></div><button class="button service-action" type="button" disabled aria-disabled="true">Только пример оформления</button></div></article>`).join('')||'<p class="ar-empty">Опубликованных товаров с такими параметрами сейчас нет. Уточните наличие в техцентре.</p>';
 }
 $('catalogSearch')?.addEventListener('input',renderCatalog);
 $('catalogType')?.addEventListener('change',renderCatalog);
 document.addEventListener('click',e=>{
- const b=e.target.closest('button[data-real-product]');if(b)openRequest('',b.dataset.realProduct);
+ const b=e.target.closest('button[data-real-product]');if(b&&!window.AR46_DEMO_MODE)openRequest('',b.dataset.realProduct);
 });
 function renderReviews(){
  const viewport=$('arReviewViewport');if(!viewport)return;
  if(!state.reviews.length){showInfo('arReviewViewport','Пока нет опубликованных подтверждённых отзывов.');$('arReviewPrev').disabled=true;$('arReviewNext').disabled=true;return;}
  state.reviewIndex=(state.reviewIndex+state.reviews.length)%state.reviews.length;
  const r=state.reviews[state.reviewIndex];
- viewport.innerHTML=`<article class="ar-review-card"><div class="ar-review-card-head"><strong>${esc(r.author)}</strong><span class="ar-verified">✓ Подтверждённый клиент</span></div><div class="ar-review-rating" aria-label="Оценка ${r.rating} из 5">${'★'.repeat(r.rating)}<span>${'☆'.repeat(5-r.rating)}</span></div><p>${esc(r.body)}</p><div class="ar-review-meta">${esc(r.vehicle||r.subject)} · ${fmt(r.published_at||r.created_at)}</div>${r.company_reply?`<div class="ar-company-reply"><strong>Ответ АвтоРейка46</strong><p>${esc(r.company_reply)}</p></div>`:''}</article>`;
+ viewport.innerHTML=`<article class="ar-review-card"><div class="ar-review-card-head"><strong>${esc(r.author)}</strong><span class="ar-verified">Образец · не реальный отзыв</span></div><div class="ar-review-rating" aria-label="Оценка ${r.rating} из 5">${'★'.repeat(r.rating)}<span>${'☆'.repeat(5-r.rating)}</span></div><p>${esc(r.body)}</p><div class="ar-review-meta">${esc(r.vehicle||r.subject)} · ${fmt(r.published_at||r.created_at)}</div>${r.company_reply?`<div class="ar-company-reply"><strong>Ответ АвтоРейка46</strong><p>${esc(r.company_reply)}</p></div>`:''}</article>`;
  $('arReviewPrev').disabled=state.reviews.length<2;$('arReviewNext').disabled=state.reviews.length<2;
 }
 function changeReview(step){state.reviewIndex=(state.reviewIndex+step+state.reviews.length)%state.reviews.length;renderReviews();}
